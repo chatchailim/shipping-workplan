@@ -19,7 +19,8 @@ export default async function ProtectedLayout({ children }: { children: React.Re
           <Link href="/dashboard">ภาพรวม</Link>
           <Link href="/customers">ลูกค้า</Link>
           <Link href="/products">สินค้า</Link>
-          <Link href="/fleet">รถและคนขับ</Link>
+            <Link href="/fleet">รถและคนขับ</Link>
+            <Link href="/schedules">ตารางรถ</Link>
           <Link href="/purchase-orders">PO</Link>
           <Link href="/orders">Order</Link>
           <Link href="/delivery">Delivery</Link>

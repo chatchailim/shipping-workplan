@@ -131,6 +131,9 @@ body {
 .order-action-stack { display: flex; flex-wrap: wrap; gap: 6px; }
 .order-action-stack form { margin: 0; }
 .danger-button { background: #b42318 !important; }
+.three-column-forms { align-items: start; display: grid; gap: 18px; grid-template-columns: repeat(3, minmax(0, 1fr)); margin-top: 24px; }
+.readiness-panel table { border-collapse: collapse; width: 100%; }
+.readiness-panel th, .readiness-panel td { border-bottom: 1px solid var(--border); padding: 10px; text-align: left; }
 
 @media (max-width: 900px) {
   .help-layout { grid-template-columns: 1fr; }
@@ -142,6 +145,7 @@ body {
   .app-sidebar nav { display: flex; overflow-x: auto; }
   .metric-grid { grid-template-columns: repeat(2, 1fr); }
   .customer-layout { grid-template-columns: 1fr; }
+  .three-column-forms { grid-template-columns: 1fr; }
 }
 
 @media (max-width: 520px) {
