@@ -116,4 +116,3 @@ docker compose exec -T postgres pg_dump -U shipping -d shipping_workplan -Fc > s
 ## Production hardening required
 
 ก่อน production ต้องเปลี่ยน development database password, ใช้ external secret manager, TLS/reverse proxy, private database network, image registry/digest pinning, backup/restore drill, monitoring/alerts, resource limits, vulnerability scanning และ formal security/UAT sign-off ตาม [TestEvidence.md](./TestEvidence.md)
-
