@@ -6,6 +6,7 @@ import { z } from "zod";
 import { requireAuthContext } from "@/lib/auth/context";
 import { requireAnyRole } from "@/lib/auth/roles";
 import { issueDailyNumber } from "@/lib/domain/numbering";
+import { recalculateAllocatedPurchaseOrders, releaseOrderAllocations } from "@/lib/domain/allocation-service";
 import { nextRunStatus } from "@/lib/domain/workflow";
 import { prisma } from "@/lib/prisma";
 
@@ -168,6 +169,7 @@ export async function submitPodAction(_state: DeliveryState, formData: FormData)
       if (driverOnly && (!context.driverId || !await tx.shippingRunDriver.findFirst({ where: { runId: run.id, driverId: context.driverId } }))) throw new Error("Driver is not assigned to this run");
       await tx.deliveryProof.create({ data: { runOrderId: stop.id, recipientName: parsed.data.recipientName, capturedById: context.userId } });
       await tx.order.update({ where: { id: order.id }, data: { status: "Delivered" } });
+      await recalculateAllocatedPurchaseOrders(tx, order.id);
       await tx.auditLog.create({ data: { entityType: "Order", entityId: order.id, action: "POD_SUBMITTED", userId: context.userId, branchId: order.branchId } });
     }, { isolationLevel: Prisma.TransactionIsolationLevel.Serializable });
   } catch (error) {
@@ -196,7 +198,9 @@ export async function deliveryFailedAction(_state: DeliveryState, formData: Form
       const existingReturn = await tx.return.findFirst({ where: { orderId: order.id } });
       if (order.status === "Delivery Failed" && existingReturn) return;
       if (order.status !== "In Transit") throw new Error("Only an In Transit order can fail delivery");
+      await releaseOrderAllocations(tx, order.id, "DeliveryFailed");
       await tx.order.update({ where: { id: order.id }, data: { status: "Delivery Failed" } });
+      await recalculateAllocatedPurchaseOrders(tx, order.id);
       if (!existingReturn) await tx.return.create({ data: { orderId: order.id, customerId: order.customerId, productId: order.productId, branchId: order.branchId, qty: order.qty, status: "Pending", notes: parsed.data.reason } });
       await tx.auditLog.create({ data: { entityType: "Order", entityId: order.id, action: "DELIVERY_FAILED", userId: context.userId, branchId: order.branchId, after: JSON.stringify({ reason: parsed.data.reason }) } });
     }, { isolationLevel: Prisma.TransactionIsolationLevel.Serializable });

@@ -8,7 +8,7 @@
 |---|---|
 | Project | OPT Shipping Work Plan v2 |
 | Proposal | DCP-001 |
-| Status | **Proposed — awaiting System Designer approval** |
+| Status | **Approved for additive implementation phases 1–3 — 20 July 2026** |
 | Prepared | 20 July 2026 |
 | Baseline revision | `63c15ab3ea9962de7edd0537640bb5ad5acb92d4` |
 | Related documents | `README.md`, `designspec.md`, `TestSpec.md`, `TestEvidence.md` |
@@ -396,21 +396,21 @@ Please approve or revise each item before implementation:
 
 | ID | Proposed decision | Approval |
 |---|---|---|
-| DCP-001-D1 | Run Completed requires every Stop to have POD/Delivered or Delivery Failed | Pending |
-| DCP-001-D2 | FIFO confirmation is all-or-nothing; shortage produces Wait-PO | Pending |
-| DCP-001-D3 | Delivery Failed releases active PO allocation | Pending |
-| DCP-001-D4 | WMS becomes authoritative for physical On Hand after branch activation | Pending |
-| DCP-001-D5 | Default freshness: Fresh ≤15m, Delayed ≤60m, Stale >60m | Pending |
-| DCP-001-D6 | Preserve `Order.poId` compatibility for at least one release cycle | Pending |
-| DCP-001-D7 | Pilot additive schema and canonical calculations at BB first | Pending |
-| DCP-001-D8 | Add Exception Workbench without replacing current module pages | Pending |
+| DCP-001-D1 | Run Completed requires every Stop to have POD/Delivered or Delivery Failed | Approved |
+| DCP-001-D2 | FIFO confirmation is all-or-nothing; shortage produces Wait-PO | Approved |
+| DCP-001-D3 | Delivery Failed releases active PO allocation | Approved |
+| DCP-001-D4 | WMS becomes authoritative for physical On Hand after branch activation | Approved |
+| DCP-001-D5 | Default freshness: Fresh ≤15m, Delayed ≤60m, Stale >60m | Approved |
+| DCP-001-D6 | Preserve `Order.poId` compatibility for at least one release cycle | Approved |
+| DCP-001-D7 | Pilot additive schema and canonical calculations at BB first | Approved |
+| DCP-001-D8 | Add Exception Workbench without replacing current module pages | Approved |
 
 ## 16. Approval record
 
 | Role | Name | Decision | Date | Notes |
 |---|---|---|---|---|
-| System Designer |  | Approve / Revise / Reject |  |  |
-| Product Owner |  | Approve / Revise / Reject |  |  |
+| System Designer | User approval recorded in Codex task | Approve D1–D8 | 20 July 2026 | Authorizes additive phases 1–3; no production activation |
+| Product Owner | User approval recorded in Codex task | Approve D1–D8 | 20 July 2026 | Reconciliation/UAT gates remain |
 | CS/Purchasing Process Owner |  | Approve / Revise / Reject |  |  |
 | Warehouse Process Owner |  | Approve / Revise / Reject |  |  |
 | Logistics Process Owner |  | Approve / Revise / Reject |  |  |

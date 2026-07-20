@@ -26,6 +26,7 @@ export default async function ProtectedLayout({ children }: { children: React.Re
             <Link href="/delivery">Delivery</Link>
             <Link href="/returns">Returns</Link>
             <Link href="/inventory">Inventory</Link>
+            <Link href="/exceptions">Exceptions</Link>
           <Link href="/help">คู่มือ</Link>
         </nav>
       </aside>

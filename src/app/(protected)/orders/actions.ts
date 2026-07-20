@@ -6,6 +6,7 @@ import { z } from "zod";
 import { requireAuthContext } from "@/lib/auth/context";
 import { requireAnyRole } from "@/lib/auth/roles";
 import { issueDailyNumber } from "@/lib/domain/numbering";
+import { allocateOrderFifo, isFifoEnabled, recalculateAllocatedPurchaseOrders, releaseOrderAllocations } from "@/lib/domain/allocation-service";
 import { canTransitionOrder, fitsSplitSource, isValidSplitQuantity } from "@/lib/domain/workflow";
 import { prisma } from "@/lib/prisma";
 
@@ -122,7 +123,9 @@ export async function cancelOrderAction(formData: FormData) {
     if (!order || !canTransitionOrder(order.status, "Cancelled")) throw new Error("Order cannot be cancelled in its current status");
     const assigned = await tx.shippingRunOrder.count({ where: { orderId: id } });
     if (assigned > 0) throw new Error("Remove the order from its delivery run before cancellation");
+    await releaseOrderAllocations(tx, id, "Cancellation");
     await tx.order.update({ where: { id }, data: { status: "Cancelled" } });
+    await recalculateAllocatedPurchaseOrders(tx, id);
     await tx.auditLog.create({ data: { entityType: "Order", entityId: id, action: "CANCEL", userId: context.userId, branchId: order.branchId } });
   });
   revalidatePath("/orders");
@@ -137,6 +140,20 @@ export async function confirmOrderAction(formData: FormData) {
     await prisma.$transaction(async (tx) => {
       const order = await tx.order.findFirst({ where: { id, branchId: context.activeBranchId ?? undefined } });
       if (!order || !canTransitionOrder(order.status, "Confirmed")) throw new Error("Order transition invalid");
+      if (await isFifoEnabled(tx, order.branchId)) {
+        const plan = await allocateOrderFifo(tx, order, context.userId);
+        if (!plan.complete) {
+          await tx.order.update({ where: { id }, data: { status: "Wait-PO" } });
+          await tx.auditLog.create({ data: { entityType: "Order", entityId: id, action: "WAIT_PO", userId: context.userId, branchId: order.branchId, after: JSON.stringify({ shortageQty: plan.shortageQty, mode: "FIFO" }) } });
+          return;
+        }
+        const poIds = [...new Set(plan.lines.map((line) => line.poId))];
+        const runNumber = await issueDailyNumber(tx, "SP", new Date());
+        await tx.order.update({ where: { id }, data: { status: "Confirmed", runNumber, poId: poIds.length === 1 ? poIds[0] : null } });
+        await recalculateAllocatedPurchaseOrders(tx, id);
+        await tx.auditLog.create({ data: { entityType: "Order", entityId: id, action: "CONFIRM_FIFO", userId: context.userId, branchId: order.branchId, after: JSON.stringify({ allocations: plan.lines }) } });
+        return;
+      }
       if (!order.poId) {
         await tx.order.update({ where: { id }, data: { status: "Wait-PO" } });
         await tx.auditLog.create({ data: { entityType: "Order", entityId: id, action: "WAIT_PO", userId: context.userId, branchId: order.branchId } });

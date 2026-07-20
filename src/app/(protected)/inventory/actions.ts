@@ -29,7 +29,14 @@ export async function createMovementAction(_state: InventoryState, formData: For
       const current = Number(inventory.onHand);
       if (!incoming && parsed.data.qty > current) throw new Error("Insufficient on-hand quantity");
       const signedQty = incoming ? parsed.data.qty : -parsed.data.qty;
+      const location = await tx.inventoryLocationBalance.findUnique({ where: { inventoryId_zone_binKey: { inventoryId: inventory.id, zone: parsed.data.zone, binKey: "" } } });
+      if (!incoming && (!location || parsed.data.qty > Number(location.onHand))) throw new Error("Insufficient on-hand quantity in the selected zone");
       await tx.inventory.update({ where: { id: inventory.id }, data: { onHand: { increment: signedQty }, zone: parsed.data.zone } });
+      await tx.inventoryLocationBalance.upsert({
+        where: { inventoryId_zone_binKey: { inventoryId: inventory.id, zone: parsed.data.zone, binKey: "" } },
+        create: { inventoryId: inventory.id, zone: parsed.data.zone, binKey: "", onHand: signedQty, source: "Manual" },
+        update: { onHand: { increment: signedQty }, source: "Manual", sourceUpdatedAt: new Date() },
+      });
       const movement = await tx.stockMovement.create({ data: { inventoryId: inventory.id, type: parsed.data.type, qty: new Prisma.Decimal(signedQty), referenceId: parsed.data.referenceId || null, note: parsed.data.note, createdById: context.userId } });
       await tx.auditLog.create({ data: { entityType: "StockMovement", entityId: movement.id, action: "CREATE", userId: context.userId, branchId: context.activeBranchId!, after: JSON.stringify({ type: parsed.data.type, qty: signedQty }) } });
     }, { isolationLevel: Prisma.TransactionIsolationLevel.Serializable });

@@ -37,8 +37,13 @@ export async function resolveReturnAction(_state: ReturnState, formData: FormDat
       if (affectsOnHand(parsed.data.resolution)) {
         const inventory = await tx.inventory.upsert({
           where: { productId_branchId: { productId: item.productId, branchId: item.branchId } },
-          create: { productId: item.productId, branchId: item.branchId, zone: "RETURN-RESTOCK", onHand: item.qty },
-          update: { onHand: { increment: item.qty } },
+          create: { productId: item.productId, branchId: item.branchId, zone: "MAIN", onHand: item.qty },
+          update: { onHand: { increment: item.qty }, zone: "MAIN" },
+        });
+        await tx.inventoryLocationBalance.upsert({
+          where: { inventoryId_zone_binKey: { inventoryId: inventory.id, zone: "MAIN", binKey: "" } },
+          create: { inventoryId: inventory.id, zone: "MAIN", binKey: "", onHand: item.qty, source: "Return" },
+          update: { onHand: { increment: item.qty }, source: "Return", sourceUpdatedAt: new Date() },
         });
         await tx.stockMovement.create({ data: { inventoryId: inventory.id, type: "Return-In", qty: item.qty, referenceId: item.id, note: parsed.data.note || "Return restocked", createdById: context.userId } });
       }

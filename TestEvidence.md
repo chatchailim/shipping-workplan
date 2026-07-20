@@ -139,7 +139,7 @@ The following areas remain outside this PASS statement:
 |---|---|---|
 | Full user/role administration and every RBAC matrix permutation | NOT RUN | Admin UI and dedicated accounts per role are incomplete |
 | CSV/XLSX import preview, reject file and conflict workflow | NOT IMPLEMENTED | Import module is not present |
-| FIFO allocation across multiple POs and bulk Order operations | PARTIAL/NOT RUN | Current Order links to one PO; full FIFO/bulk harness is pending |
+| FIFO allocation across multiple POs and bulk Order operations | PARTIAL | Canonical multi-PO calculator and persisted allocation model pass unit/build checks; browser E2E and concurrent PostgreSQL test remain open |
 | Drag-and-drop Day Board and mobile-only Driver view | NOT IMPLEMENTED | Current stop ordering uses accessible up/down controls |
 | POD image/signature upload, MIME/size validation and private storage | NOT IMPLEMENTED | Current POD stores metadata only |
 | Production Plan and production-to-stock workflow | NOT IMPLEMENTED | P4 remaining scope |
@@ -160,6 +160,19 @@ The following areas remain outside this PASS statement:
 | Production Go-Live | **NO-GO at this time** |
 
 Production release remains conditional on completing section 6, resolving open decisions in `designspec.md`, executing formal role-based UAT and obtaining Product Owner/IT/Legal approvals where applicable.
+
+## 9. DCP-001 approved pilot evidence — 20 July 2026
+
+| Gate | Result | Evidence |
+|---|---|---|
+| Additive migration | PASS | Four migrations applied; Prisma reports database schema up to date |
+| Legacy allocation reconciliation dry-run | PASS | 2 candidate Orders, 2 allocation rows, 1 location row, 0 conflicts |
+| BB pilot apply | PASS | Allocation/location backfill applied and `DCP001_FIFO` enabled only for BB |
+| Idempotency check | PASS | Post-apply dry-run reports 0 allocation rows, 0 location rows, 0 conflicts |
+| Canonical FIFO/status/availability/freshness unit tests | PASS | `npm run check`: 7 test files, 25 tests passed |
+| Static/type/schema quality gates | PASS | ESLint, TypeScript and Prisma validation passed |
+| Production build | PASS | Next.js optimized build completed; `/exceptions`, `/inventory`, `/orders`, and `/purchase-orders` compiled |
+| Production activation | NOT AUTHORIZED | This is a branch-scoped BB pilot; formal UAT, concurrency, security and operational gates remain open |
 
 ## 8. Human acceptance
 

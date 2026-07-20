@@ -138,6 +138,22 @@ model Inventory {
   @@unique([productId, branchId])
 }
 
+model InventoryLocationBalance {
+  id              String    @id @default(cuid())
+  inventoryId     String
+  zone            String
+  bin             String?
+  binKey          String    @default("")
+  onHand          Decimal   @default(0) @db.Decimal(18, 3)
+  source          String
+  sourceUpdatedAt DateTime?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  @@unique([inventoryId, zone, binKey])
+  @@index([inventoryId])
+}
+
 model StockMovement {
   id          String   @id @default(cuid())
   inventoryId String
@@ -221,6 +237,35 @@ model Order {
 
   @@index([branchId, status, requiredDate])
   @@index([poId])
+}
+
+model OrderAllocation {
+  id                 String    @id @default(cuid())
+  orderId            String
+  poItemId            String
+  allocatedQty        Decimal   @db.Decimal(18, 3)
+  allocationSequence Int
+  status              String    @default("Active")
+  allocatedAt         DateTime  @default(now())
+  releasedAt          DateTime?
+  releaseReason       String?
+  createdById         String?
+
+  @@unique([orderId, poItemId, allocationSequence])
+  @@index([orderId, status])
+  @@index([poItemId, status])
+}
+
+model BranchFeatureFlag {
+  id        String   @id @default(cuid())
+  branchId  String
+  key       String
+  enabled   Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([branchId, key])
+  @@index([key, enabled])
 }
 
 model ShippingRun {
