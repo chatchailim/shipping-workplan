@@ -11,7 +11,8 @@ export default function Home() {
           โปรดอ่านภาพรวมกระบวนการ บทบาท และขั้นตอนตามหน้าที่ในคู่มือ
         </p>
         <div className="home-actions">
-          <Link className="primary-link" href="/help">เปิดคู่มือการใช้งาน</Link>
+          <Link className="primary-link" href="/login">เข้าสู่ระบบ</Link>
+          <Link className="secondary-link" href="/help">เปิดคู่มือการใช้งาน</Link>
           <Link className="secondary-link" href="/help#4-ภาพรวมกระบวนการทั้งหมด">ดูกระบวนการทั้งหมด</Link>
         </div>
         <dl className="status-grid">

@@ -13,8 +13,9 @@ const branches = [
 ] as const;
 
 async function main() {
+  const seededBranches = [];
   for (const [code, name, country, currency, timezone] of branches) {
-    await prisma.branch.upsert({ where: { code }, update: {}, create: { code, name, country, currency, timezone } });
+    seededBranches.push(await prisma.branch.upsert({ where: { code }, update: {}, create: { code, name, country, currency, timezone } }));
   }
   for (const item of [{ code: "1", name: "Pickup" }, { code: "2", name: "6-Wheel Truck" }, { code: "3", name: "10-Wheel Truck" }]) {
     await prisma.vehicleClass.upsert({ where: { code: item.code }, update: {}, create: item });
@@ -35,6 +36,13 @@ async function main() {
     update: {},
     create: { userId: user.id, role: "SUPER_ADMIN" },
   });
+  for (const branch of seededBranches) {
+    await prisma.userBranch.upsert({
+      where: { userId_branchId: { userId: user.id, branchId: branch.id } },
+      update: {},
+      create: { userId: user.id, branchId: branch.id },
+    });
+  }
 }
 
 main().finally(() => prisma.$disconnect());

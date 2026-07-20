@@ -7,7 +7,7 @@
 | เวอร์ชันคู่มือ | 1.0 |
 | ปรับปรุงล่าสุด | 20 กรกฎาคม 2026 |
 | ระบบ | OPT Shipping Work Plan v2 |
-| สถานะระบบ | P0 Foundation พร้อม; หน้าธุรกิจ P1–P6 อยู่ระหว่างพัฒนา |
+| สถานะระบบ | P0 Foundation พร้อม; P1 กำลังพัฒนา โดย Login, protected dashboard, branch context, health และ Customer list/create พร้อมทดสอบขั้นต้น |
 | กลุ่มผู้อ่าน | CS, Purchasing, Warehouse, Logistics, Production, Driver, Branch Admin, Super Admin |
 
 ## สารบัญ
@@ -92,7 +92,7 @@ flowchart LR
 
 ### 2.3 สถานะปัจจุบันของผลิตภัณฑ์
 
-โครงการมี foundation, database schema, migration, authentication policy, branch scoping, tests และ CI แล้ว แต่เมนูธุรกิจจะทยอยเปิดตามเฟส P1–P6 หากเมนูในคู่มือนี้ยังไม่ปรากฏ หมายถึง feature นั้นยังไม่เปิดใช้ ไม่ใช่ปัญหาสิทธิ์เสมอไป
+โครงการมี foundation, database schema, migration, authentication, protected dashboard, branch context, health check และ Customer master vertical slice แล้ว เมนูธุรกิจส่วนอื่นจะทยอยเปิดตามเฟส P1–P6 หากเมนูในคู่มือนี้ยังไม่ปรากฏ หมายถึง feature นั้นยังไม่เปิดใช้ ไม่ใช่ปัญหาสิทธิ์เสมอไป
 
 ---
 
@@ -833,4 +833,3 @@ npm run build
 4. ห้ามส่ง password, session token หรือข้อมูลส่วนบุคคลเกินจำเป็น
 
 คู่มือนี้ต้องได้รับการปรับปรุงเมื่อ workflow, role, status, menu, import template หรือ integration contract เปลี่ยน
-
