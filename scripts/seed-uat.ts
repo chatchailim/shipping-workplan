@@ -29,7 +29,11 @@ async function main() {
   const users = new Map<string, string>();
   for (const role of roles) {
     const email = `${role.toLowerCase().replace("_", "-")}@uat.example.invalid`;
-    const user = await prisma.user.upsert({ where: { email }, update: { active: true }, create: { name: `UAT ${role}`, email, passwordHash } });
+    const user = await prisma.user.upsert({
+      where: { email },
+      update: { active: true, passwordHash, failedLoginAttempts: 0, lockedUntil: null, sessionVersion: { increment: 1 } },
+      create: { name: `UAT ${role}`, email, passwordHash },
+    });
     await prisma.userRoleEntry.upsert({ where: { userId_role: { userId: user.id, role } }, update: {}, create: { userId: user.id, role } });
     await prisma.userBranch.upsert({ where: { userId_branchId: { userId: user.id, branchId: branch.id } }, update: {}, create: { userId: user.id, branchId: branch.id } });
     users.set(role, user.id);
