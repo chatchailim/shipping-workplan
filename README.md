@@ -1,5 +1,7 @@
 # คู่มือการใช้งาน OPT Shipping Work Plan v2
 
+> **สำหรับนักพัฒนา:** ดู [DEVELOPER_GUIDE.md](./DEVELOPER_GUIDE.md) สำหรับการติดตั้ง สถาปัตยกรรม การพัฒนา migration/testing และ DCP-001 และดู [CONTRIBUTING.md](./CONTRIBUTING.md) ก่อนส่ง Pull Request
+
 > คู่มือสำหรับผู้ใช้งานเริ่มต้น ตั้งแต่ทำความเข้าใจกระบวนการ เข้าสู่ระบบ ทำงานประจำวัน ไปจนถึงแก้ปัญหาเบื้องต้น
 
 | รายการ | รายละเอียด |
@@ -12,7 +14,7 @@
 
 หลักฐานการทดสอบและข้อจำกัดการส่งมอบล่าสุดอยู่ที่ [TestEvidence.md](./TestEvidence.md) โดย PASS ครอบคลุมเฉพาะ scope ที่ implement และ execute แล้ว ไม่ใช่ production sign-off ทั้ง TestSpec
 
-ข้อเสนอการเปลี่ยนแปลงกฎกลาง, FIFO หลาย PO และ Inventory/WMS freshness อยู่ที่ [DesignChangeProposal-001.md](./DesignChangeProposal-001.md) สถานะ Proposed และยังไม่อนุญาตให้เปลี่ยน schema/business logic จนกว่าผู้ออกแบบระบบจะอนุมัติ
+การเปลี่ยนแปลงกฎกลาง, FIFO หลาย PO และ Inventory/WMS freshness อยู่ที่ [DesignChangeProposal-001.md](./DesignChangeProposal-001.md) ซึ่งได้รับอนุมัติสำหรับ additive implementation phases 1–3 และเปิด BB pilot แล้ว แต่ยังไม่ใช่ Production Go-Live
 
 ## สารบัญ
 
