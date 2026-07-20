@@ -18,6 +18,11 @@ export default async function ProtectedLayout({ children }: { children: React.Re
         <nav aria-label="เมนูหลัก">
           <Link href="/dashboard">ภาพรวม</Link>
           <Link href="/customers">ลูกค้า</Link>
+          <Link href="/products">สินค้า</Link>
+          <Link href="/fleet">รถและคนขับ</Link>
+          <Link href="/purchase-orders">PO</Link>
+          <Link href="/orders">Order</Link>
+          <Link href="/delivery">Delivery</Link>
           <Link href="/help">คู่มือ</Link>
         </nav>
       </aside>

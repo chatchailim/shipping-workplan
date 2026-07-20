@@ -83,7 +83,7 @@ body {
 .login-card > p:not(.home-eyebrow) { color: var(--muted); }
 .login-form, .entity-form { display: grid; gap: 15px; margin-top: 24px; }
 .login-form label, .entity-form label { display: grid; font-weight: 700; gap: 6px; }
-.login-form input, .entity-form input, .context-bar select { border: 1px solid #aebbc9; border-radius: 6px; font: inherit; padding: 10px 11px; }
+.login-form input, .entity-form input, .entity-form select, .context-bar select, .run-card select { border: 1px solid #aebbc9; border-radius: 6px; font: inherit; padding: 10px 11px; }
 .login-form button, .entity-form button, .context-bar button { background: var(--primary); border: 0; border-radius: 6px; color: #fff; cursor: pointer; font: inherit; font-weight: 700; padding: 10px 14px; }
 .login-form button:disabled, .entity-form button:disabled { cursor: wait; opacity: .65; }
 .form-error { background: #fff0f0; border-left: 4px solid #b42318; color: #8c1d18; margin: 0; padding: 10px; }
@@ -119,6 +119,11 @@ body {
 .entity-form { margin: 0; }
 .entity-form h2 { margin: 0; }
 .empty-state, .permission-note { color: var(--muted); }
+.form-stack { display: grid; gap: 18px; }
+.run-card { background: #f8fafc; border: 1px solid var(--border); border-radius: 8px; margin: 12px 0; padding: 16px; }
+.run-card h3 { margin: 0; }
+.run-card form { display: inline-flex; flex-wrap: wrap; gap: 8px; margin: 5px 8px 0 0; }
+.run-card button, .customer-layout table button { background: var(--primary); border: 0; border-radius: 5px; color: #fff; padding: 7px 10px; }
 
 @media (max-width: 900px) {
   .help-layout { grid-template-columns: 1fr; }

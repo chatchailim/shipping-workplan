@@ -7,7 +7,7 @@
 | เวอร์ชันคู่มือ | 1.0 |
 | ปรับปรุงล่าสุด | 20 กรกฎาคม 2026 |
 | ระบบ | OPT Shipping Work Plan v2 |
-| สถานะระบบ | P0 Foundation พร้อม; P1 กำลังพัฒนา โดย Login, protected dashboard, branch context, health และ Customer list/create พร้อมทดสอบขั้นต้น |
+| สถานะระบบ | P0 Foundation พร้อม; P1–P3 มี vertical slice ระดับโครงสร้างตั้งแต่ Customer/Product/Fleet → PO/Order → Delivery และผ่าน smoke test ในเครื่อง แต่ยังไม่ผ่าน production gate |
 | กลุ่มผู้อ่าน | CS, Purchasing, Warehouse, Logistics, Production, Driver, Branch Admin, Super Admin |
 
 ## สารบัญ
@@ -92,7 +92,7 @@ flowchart LR
 
 ### 2.3 สถานะปัจจุบันของผลิตภัณฑ์
 
-โครงการมี foundation, database schema, migration, authentication, protected dashboard, branch context, health check และ Customer master vertical slice แล้ว เมนูธุรกิจส่วนอื่นจะทยอยเปิดตามเฟส P1–P6 หากเมนูในคู่มือนี้ยังไม่ปรากฏ หมายถึง feature นั้นยังไม่เปิดใช้ ไม่ใช่ปัญหาสิทธิ์เสมอไป
+โครงการมี foundation, authentication, protected dashboard, branch context และ vertical slice สำหรับ Customer, Product, Fleet, PO, Order และ Delivery แล้ว โดยทดสอบเส้นทาง Product → Fleet → PO → Order → Delivery สำเร็จในเครื่อง ฟังก์ชันขั้นสูง เช่น import/preview, แก้ไขราคาและ price history, split/bulk/amendment, recurring schedule, drag/drop, POD/Return, integration, performance และ security/UAT เต็มรูปแบบ ยังอยู่ในเฟสถัดไป จึงยังไม่ควรใช้กับ production จริง
 
 ---
 
