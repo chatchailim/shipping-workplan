@@ -174,6 +174,19 @@ Production release remains conditional on completing section 6, resolving open d
 | Production build | PASS | Next.js optimized build completed; `/exceptions`, `/inventory`, `/orders`, and `/purchase-orders` compiled |
 | Production activation | NOT AUTHORIZED | This is a branch-scoped BB pilot; formal UAT, concurrency, security and operational gates remain open |
 
+## 10. Docker installation evidence — 20 July 2026
+
+| Gate | Result | Evidence |
+|---|---|---|
+| Multi-stage image build | PASS | Node.js 24 Bookworm slim image built with Prisma Client, OpenSSL and optimized Next.js output |
+| Existing database preservation | PASS | Compose reused the existing `shipping_pgdata` volume; no volume deletion/recreation command was used |
+| Migration startup gate | PASS | App startup found 4 migrations and reported no pending migrations |
+| Idempotent seed | PASS | Master/admin seed command completed before application startup |
+| Container health | PASS | `app` and `postgres` reported healthy through Docker Compose |
+| Runtime database health | PASS | `GET /api/health` returned HTTP 200 with `status=ok` and `database=ok` |
+| Public Docker instructions | PASS | `DOCKER.md` covers install, update, logs, port override, backup and production hardening |
+| Production certification | NOT ACHIEVED | Current Compose credentials/network defaults are for development/demo/UAT; production hardening gates remain open |
+
 ## 8. Human acceptance
 
 | Role | Name | Decision/signature | Date |

@@ -4,6 +4,8 @@
 
 > **สำหรับนักพัฒนา:** ดู [DEVELOPER_GUIDE.md](./DEVELOPER_GUIDE.md) สำหรับการติดตั้ง สถาปัตยกรรม การพัฒนา migration/testing และ DCP-001 และดู [CONTRIBUTING.md](./CONTRIBUTING.md) ก่อนส่ง Pull Request
 
+> **ติดตั้งด้วย Docker:** ดู [DOCKER.md](./DOCKER.md) สำหรับการ build, start, update, health check และ backup ระบบแบบ Docker Compose
+
 > คู่มือสำหรับผู้ใช้งานเริ่มต้น ตั้งแต่ทำความเข้าใจกระบวนการ เข้าสู่ระบบ ทำงานประจำวัน ไปจนถึงแก้ปัญหาเบื้องต้น
 
 | รายการ | รายละเอียด |
