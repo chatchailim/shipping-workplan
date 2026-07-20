@@ -1,0 +1,462 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id                  String    @id @default(cuid())
+  name                String
+  email               String    @unique
+  passwordHash        String
+  active              Boolean   @default(true)
+  driverId            String?   @unique
+  failedLoginAttempts Int       @default(0)
+  lockedUntil         DateTime?
+  sessionVersion      Int       @default(0)
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime  @updatedAt
+}
+
+model UserRoleEntry {
+  id     String @id @default(cuid())
+  userId String
+  role   String
+
+  @@unique([userId, role])
+  @@index([userId])
+}
+
+model UserBranch {
+  id       String @id @default(cuid())
+  userId   String
+  branchId String
+
+  @@unique([userId, branchId])
+  @@index([branchId])
+}
+
+model Branch {
+  id        String   @id @default(cuid())
+  name      String
+  code      String   @unique
+  address   String?
+  phone     String?
+  taxId     String?
+  taxRate   Decimal  @default(0.07) @db.Decimal(5, 4)
+  country   String   @default("TH")
+  currency  String   @default("THB")
+  timezone  String   @default("Asia/Bangkok")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Customer {
+  id                  String   @id @default(cuid())
+  customerCode        String?
+  companyName         String
+  address             String?
+  paymentTerms        String   @default("Net30")
+  defaultDeliveryTime String?
+  contactName         String?
+  phone               String?
+  email               String?
+  taxId               String?
+  branchId            String
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+
+  @@index([branchId])
+}
+
+model CustomerContact {
+  id         String   @id @default(cuid())
+  customerId String
+  name       String
+  email      String?
+  phone      String?
+  isDefault  Boolean  @default(false)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@index([customerId])
+}
+
+model Product {
+  id          String   @id @default(cuid())
+  erpCode     String   @unique
+  partName    String?
+  sku         String?
+  description String?
+  partCode    String?
+  customerPN  String?
+  cocNumber   String?
+  boiStatus   String?
+  material    String
+  color       String
+  dimensions  String
+  weightKg    Float
+  price       Decimal  @db.Decimal(18, 2)
+  unit        String   @default("pcs")
+  pcsPerPack  Int      @default(1)
+  active      Boolean  @default(true)
+  branchId    String
+  customerId  String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([branchId])
+}
+
+model ProductPriceLog {
+  id          String   @id @default(cuid())
+  productId   String
+  oldPrice    Decimal  @db.Decimal(18, 2)
+  newPrice    Decimal  @db.Decimal(18, 2)
+  changedById String
+  changedAt   DateTime @default(now())
+  source      String
+  poNumber    String?
+
+  @@index([productId, changedAt])
+}
+
+model Inventory {
+  id        String   @id @default(cuid())
+  productId String
+  branchId  String
+  zone      String
+  bin       String?
+  onHand    Decimal  @default(0) @db.Decimal(18, 3)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([productId, branchId])
+}
+
+model StockMovement {
+  id          String   @id @default(cuid())
+  inventoryId String
+  type        String
+  qty         Decimal  @db.Decimal(18, 3)
+  referenceId String?
+  note        String?
+  createdAt   DateTime @default(now())
+  createdById String?
+
+  @@index([inventoryId, createdAt])
+}
+
+model ProductionPlan {
+  id         String   @id @default(cuid())
+  productId  String
+  branchId   String
+  plannedQty Decimal  @db.Decimal(18, 3)
+  startDate  DateTime @db.Date
+  dueDate    DateTime @db.Date
+  status     String   @default("Planned")
+  note       String?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@index([branchId, dueDate])
+}
+
+model PurchaseOrder {
+  id         String    @id @default(cuid())
+  poNumber   String
+  customerId String
+  branchId   String
+  poDate     DateTime? @db.Date
+  buyerName  String?
+  buyerEmail String?
+  buyerPhone String?
+  status     String    @default("Open")
+  soNumber   String?
+  notes      String?
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+
+  @@unique([branchId, poNumber])
+}
+
+model PurchaseOrderItem {
+  id                   String    @id @default(cuid())
+  poId                 String
+  productId            String
+  originalQty          Decimal   @db.Decimal(18, 3)
+  unit                 String    @default("pcs")
+  unitPrice            Decimal?  @db.Decimal(18, 2)
+  expectedDeliveryDate DateTime? @db.Date
+  deliveryTimeSlot     String?
+  createdAt            DateTime  @default(now())
+  updatedAt            DateTime  @updatedAt
+
+  @@index([poId, productId])
+}
+
+model Order {
+  id               String   @id @default(cuid())
+  customerId       String
+  customerPORef    String
+  productId        String
+  branchId         String
+  poId             String?
+  qty              Decimal  @db.Decimal(18, 3)
+  status           String   @default("Draft")
+  priority         String   @default("Normal")
+  runNumber        String?  @unique
+  orderType        String   @default("Sales")
+  requiredDate     DateTime @db.Date
+  shippingTimeSlot String?
+  notes            String?
+  parentOrderId    String?
+  rootOrderId      String?
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  @@index([branchId, status, requiredDate])
+  @@index([poId])
+}
+
+model ShippingRun {
+  id             String   @id @default(cuid())
+  runNumber      String?  @unique
+  branchId       String
+  vehicleId      String
+  plannedDate    DateTime @db.Date
+  departureTime  String?
+  runType        String?
+  noteToDriver   String?
+  noteToCustomer String?
+  status         String   @default("Planned")
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  @@index([branchId, plannedDate, status])
+}
+
+model RunNumberCounter {
+  id        String @id @default(cuid())
+  yearMonth String @unique
+  lastValue Int    @default(0)
+}
+
+model ShippingRunDriver {
+  id        String  @id @default(cuid())
+  runId     String
+  driverId  String
+  isPrimary Boolean @default(true)
+
+  @@unique([runId, driverId])
+}
+
+model ShippingRunOrder {
+  id                   String  @id @default(cuid())
+  runId                String
+  orderId              String
+  stopSequence         Int     @default(0)
+  deliveryTimeOverride String?
+  inOutSystem          String?
+  note                 String?
+
+  @@unique([runId, orderId])
+  @@index([runId, stopSequence])
+}
+
+model Vehicle {
+  id             String   @id @default(cuid())
+  branchId       String
+  plate          String   @unique
+  type           String
+  payloadKg      Float
+  volumeM3       Float
+  vehicleClassId String?
+  ownership      String   @default("Owned")
+  active         Boolean  @default(true)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  @@index([branchId])
+}
+
+model Driver {
+  id            String   @id @default(cuid())
+  branchId      String
+  name          String
+  licenseNo     String
+  licenseExpiry DateTime @db.Date
+  phone         String
+  active        Boolean  @default(true)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@index([branchId])
+}
+
+model VehicleClass {
+  id          String   @id @default(cuid())
+  code        String   @unique
+  name        String
+  description String?
+  active      Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model DriverVehicleClass {
+  id             String   @id @default(cuid())
+  driverId       String
+  vehicleClassId String
+  createdAt      DateTime @default(now())
+
+  @@unique([driverId, vehicleClassId])
+}
+
+model DriverVehicleAssignment {
+  id                String    @id @default(cuid())
+  branchId          String
+  vehicleId         String
+  primaryDriverId   String
+  secondaryDriverId String?
+  scheduleType      String
+  rotationOnDays    Int?
+  rotationOffDays   Int?
+  rotationStartDate DateTime? @db.Date
+  customWorkingDays String?
+  runsPerDay        Int       @default(1)
+  run1TimeSlot      String    @default("Morning")
+  run2TimeSlot      String?
+  run3TimeSlot      String?
+  effectiveFrom     DateTime  @db.Date
+  effectiveTo       DateTime? @db.Date
+  active            Boolean   @default(true)
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+
+  @@index([branchId, active])
+}
+
+model DriverScheduleOverride {
+  id                 String   @id @default(cuid())
+  assignmentId       String
+  date               DateTime @db.Date
+  overrideType       String
+  substituteDriverId String?
+  reason             String?
+  active             Boolean  @default(true)
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+
+  @@unique([assignmentId, date])
+}
+
+model Return {
+  id                String    @id @default(cuid())
+  orderId           String?
+  customerId        String
+  productId         String
+  branchId          String
+  qty               Decimal   @db.Decimal(18, 3)
+  status            String    @default("Pending")
+  resolution        String?
+  notes             String?
+  driverConfirmedAt DateTime?
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+
+  @@index([branchId, status])
+}
+
+model AuditLog {
+  id         String   @id @default(cuid())
+  entityType String
+  entityId   String
+  action     String
+  userId     String
+  branchId   String
+  note       String?
+  before     String?
+  after      String?
+  createdAt  DateTime @default(now())
+
+  @@index([entityType, entityId])
+  @@index([branchId, createdAt])
+}
+
+model WmsSyncLog {
+  id          String    @id @default(cuid())
+  branchId    String
+  mode        String
+  sourceFile  String?
+  startedAt   DateTime  @default(now())
+  completedAt DateTime?
+  rowCount    Int       @default(0)
+  status      String    @default("Pending")
+  error       String?
+
+  @@index([branchId, startedAt])
+}
+
+model DeliveryProof {
+  id            String   @id @default(cuid())
+  runOrderId    String
+  imagePath     String?
+  signaturePath String?
+  recipientName String?
+  capturedAt    DateTime @default(now())
+  capturedById  String
+  latitude      Decimal? @db.Decimal(10, 7)
+  longitude     Decimal? @db.Decimal(10, 7)
+
+  @@index([runOrderId])
+}
+
+model ErpExportBatch {
+  id          String   @id @default(cuid())
+  batchType   String
+  dateFrom    DateTime @db.Date
+  dateTo      DateTime @db.Date
+  entryCount  Int      @default(0)
+  filePath    String?
+  status      String   @default("Pending")
+  branchId    String
+  createdById String
+  createdAt   DateTime @default(now())
+
+  @@index([branchId, batchType, createdAt])
+}
+
+model RmSupplierMapping {
+  id           String   @id @default(cuid())
+  wmsRmId      String
+  supplierName String
+  erpRmCode    String
+  active       Boolean  @default(true)
+  branchId     String
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@unique([branchId, wmsRmId, supplierName])
+}
+
+model RmIssueRecord {
+  id               String   @id @default(cuid())
+  wmsRmId          String
+  rollRef          String?
+  qrCode           String?
+  qty              Decimal  @db.Decimal(18, 3)
+  issuedAt         DateTime
+  resolvedSupplier String?
+  erpRmCode        String?
+  exportBatchId    String?
+  status           String   @default("Pending")
+  branchId         String
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  @@index([branchId, status, issuedAt])
+}
