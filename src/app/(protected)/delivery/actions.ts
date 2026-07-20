@@ -191,7 +191,7 @@ export async function advanceRunAction(formData: FormData) {
             }),
             tx.order.aggregate({
               _sum: { qty: true },
-              where: { poId, status: { notIn: ["Draft", "Cancelled"] } },
+              where: { poId, status: { notIn: ["Draft", "Cancelled", "Split-shipping"] } },
             }),
             tx.order.aggregate({
               _sum: { qty: true },

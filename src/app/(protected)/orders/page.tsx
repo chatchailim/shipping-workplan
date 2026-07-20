@@ -1,2 +1,38 @@
-import { prisma } from "@/lib/prisma";import { requireAuthContext } from "@/lib/auth/context";import { hasAnyRole } from "@/lib/auth/roles";import { OrderForm } from "./order-form";import { confirmOrderAction,readyOrderAction } from "./actions";export const dynamic="force-dynamic";
-export default async function Page(){const c=await requireAuthContext();const w=c.activeBranchId?{branchId:c.activeBranchId}:undefined;const[orders,customers,products,pos]=await Promise.all([prisma.order.findMany({where:w,orderBy:{createdAt:"desc"},take:100}),prisma.customer.findMany({where:w}),prisma.product.findMany({where:{...w,active:true}}),prisma.purchaseOrder.findMany({where:{...w,status:{not:"Closed"}}})]);return <main className="content-page"><header><p className="home-eyebrow">SHIPPING PLAN</p><h1>Orders</h1></header><div className="customer-layout"><section><h2>รายการ ({orders.length})</h2><div className="table-scroll"><table><thead><tr><th>SP</th><th>PO Ref</th><th>Qty</th><th>วันที่</th><th>สถานะ</th><th>Action</th></tr></thead><tbody>{orders.map(x=><tr key={x.id}><td>{x.runNumber||"—"}</td><td>{x.customerPORef}</td><td>{x.qty.toString()}</td><td>{x.requiredDate.toISOString().slice(0,10)}</td><td>{x.status}</td><td>{x.status==="Draft"&&<form action={confirmOrderAction}><input type="hidden" name="id" value={x.id}/><button>Confirm</button></form>}{x.status==="Confirmed"&&<form action={readyOrderAction}><input type="hidden" name="id" value={x.id}/><button>Ready</button></form>}</td></tr>)}</tbody></table></div></section>{hasAnyRole(c.roles,["CS","BRANCH_ADMIN"])?<OrderForm customers={customers.map(x=>({id:x.id,label:x.companyName}))} products={products.map(x=>({id:x.id,label:`${x.erpCode} — ${x.partName}`}))} pos={pos.map(x=>({id:x.id,label:x.poNumber}))}/>:<aside className="permission-note">ไม่มีสิทธิ์สร้าง Order</aside>}</div></main>}
+import { requireAuthContext } from "@/lib/auth/context";
+import { hasAnyRole } from "@/lib/auth/roles";
+import { prisma } from "@/lib/prisma";
+import { cancelOrderAction, confirmOrderAction, readyOrderAction } from "./actions";
+import { DraftOrderActions } from "./order-actions";
+import { OrderForm } from "./order-form";
+
+export const dynamic = "force-dynamic";
+
+export default async function OrdersPage() {
+  const context = await requireAuthContext();
+  const branchWhere = context.activeBranchId ? { branchId: context.activeBranchId } : undefined;
+  const canManage = hasAnyRole(context.roles, ["CS", "BRANCH_ADMIN"]);
+  const [orders, customers, products, purchaseOrders] = await Promise.all([
+    prisma.order.findMany({ where: branchWhere, orderBy: { createdAt: "desc" }, take: 100 }),
+    prisma.customer.findMany({ where: branchWhere }),
+    prisma.product.findMany({ where: { ...branchWhere, active: true } }),
+    prisma.purchaseOrder.findMany({ where: { ...branchWhere, status: { not: "Closed" } } }),
+  ]);
+
+  return <main className="content-page"><header><p className="home-eyebrow">SHIPPING PLAN</p><h1>Orders</h1></header>
+    <div className="customer-layout"><section><h2>รายการ ({orders.length})</h2><div className="table-scroll"><table>
+      <thead><tr><th>SP</th><th>PO Ref</th><th>Qty</th><th>วันที่</th><th>สถานะ</th><th>ความสัมพันธ์</th><th>Action</th></tr></thead>
+      <tbody>{orders.map((order) => <tr key={order.id}>
+        <td>{order.runNumber || "—"}</td><td>{order.customerPORef}</td><td>{order.qty.toString()}</td>
+        <td>{order.requiredDate.toISOString().slice(0, 10)}</td><td>{order.status}</td>
+        <td>{order.parentOrderId ? "Split child" : order.status === "Split-shipping" ? "Split source" : "—"}</td>
+        <td><div className="order-action-stack">
+          {order.status === "Draft" && canManage && <DraftOrderActions order={{ id: order.id, qty: order.qty.toString(), requiredDate: order.requiredDate.toISOString().slice(0, 10), shippingTimeSlot: order.shippingTimeSlot, priority: order.priority }} />}
+          {order.status === "Draft" && canManage && <form action={confirmOrderAction}><input type="hidden" name="id" value={order.id} /><button>Confirm</button></form>}
+          {order.status === "Confirmed" && <form action={readyOrderAction}><input type="hidden" name="id" value={order.id} /><button>Ready</button></form>}
+          {["Draft", "Confirmed", "Ready to Ship"].includes(order.status) && canManage && <form action={cancelOrderAction}><input type="hidden" name="id" value={order.id} /><button className="danger-button">Cancel</button></form>}
+        </div></td>
+      </tr>)}</tbody></table></div></section>
+      {canManage ? <OrderForm customers={customers.map((customer) => ({ id: customer.id, label: customer.companyName }))} products={products.map((product) => ({ id: product.id, label: `${product.erpCode} — ${product.partName}` }))} pos={purchaseOrders.map((po) => ({ id: po.id, label: po.poNumber }))} /> : <aside className="permission-note">ไม่มีสิทธิ์สร้าง Order</aside>}
+    </div>
+  </main>;
+}

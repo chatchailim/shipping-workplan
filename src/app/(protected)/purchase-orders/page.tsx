@@ -19,7 +19,7 @@ export default async function PurchaseOrdersPage() {
   const poIds = purchaseOrders.map((po) => po.id);
   const [items, releasedOrders] = await Promise.all([
     prisma.purchaseOrderItem.findMany({ where: { poId: { in: poIds } } }),
-    prisma.order.findMany({ where: { poId: { in: poIds }, status: { notIn: ["Draft", "Cancelled"] } } }),
+    prisma.order.findMany({ where: { poId: { in: poIds }, status: { notIn: ["Draft", "Cancelled", "Split-shipping"] } } }),
   ]);
   const productOptions = products.map((product) => ({ id: product.id, label: `${product.erpCode} — ${product.partName}` }));
 

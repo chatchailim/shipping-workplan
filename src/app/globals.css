@@ -128,6 +128,9 @@ body {
 .edit-panel summary { color: var(--primary); cursor: pointer; font-weight: 700; }
 .edit-panel[open] { background: #f8fafc; border: 1px solid var(--border); border-radius: 8px; padding: 12px; width: min(420px, 75vw); }
 .compact-form { margin-top: 12px; padding: 14px; }
+.order-action-stack { display: flex; flex-wrap: wrap; gap: 6px; }
+.order-action-stack form { margin: 0; }
+.danger-button { background: #b42318 !important; }
 
 @media (max-width: 900px) {
   .help-layout { grid-template-columns: 1fr; }

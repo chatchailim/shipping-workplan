@@ -23,3 +23,11 @@ export function nextRunStatus(current: string): string | null {
 export function availablePoBalance(originalQty: number, releasedQty: number): number {
   return Math.max(0, originalQty - releasedQty);
 }
+
+export function isValidSplitQuantity(totalQty: number, firstQty: number): boolean {
+  return totalQty > 0 && firstQty > 0 && firstQty < totalQty;
+}
+
+export function fitsSplitSource(sourceQty: number, otherChildrenQty: number, newQty: number): boolean {
+  return sourceQty > 0 && newQty > 0 && otherChildrenQty + newQty <= sourceQty;
+}
