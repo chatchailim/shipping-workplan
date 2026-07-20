@@ -10,6 +10,8 @@
 | สถานะระบบ | P0 Foundation พร้อม; P1–P3 มี vertical slice ระดับโครงสร้างตั้งแต่ Customer/Product/Fleet → PO/Order → Delivery และผ่าน smoke test ในเครื่อง แต่ยังไม่ผ่าน production gate |
 | กลุ่มผู้อ่าน | CS, Purchasing, Warehouse, Logistics, Production, Driver, Branch Admin, Super Admin |
 
+หลักฐานการทดสอบและข้อจำกัดการส่งมอบล่าสุดอยู่ที่ [TestEvidence.md](./TestEvidence.md) โดย PASS ครอบคลุมเฉพาะ scope ที่ implement และ execute แล้ว ไม่ใช่ production sign-off ทั้ง TestSpec
+
 ## สารบัญ
 
 1. [ระบบนี้ใช้ทำอะไร](#1-ระบบนี้ใช้ทำอะไร)
