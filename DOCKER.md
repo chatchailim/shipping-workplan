@@ -61,6 +61,8 @@
 
    เปิดเว็บที่ <http://localhost:3000> และ health endpoint ที่ <http://localhost:3000/api/health>
 
+6. หากต้องการชุดข้อมูลสังเคราะห์สำหรับทดสอบเหมือนจริง ให้ทำตาม [INITIAL_DATA_GUIDE.md](./INITIAL_DATA_GUIDE.md)
+
 ## Daily commands
 
 ```bash

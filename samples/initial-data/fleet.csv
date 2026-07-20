@@ -1,0 +1,2 @@
+branch_code,plate,vehicle_type,vehicle_class_code,payload_kg,volume_m3,ownership,driver_name,license_no,license_expiry,driver_phone,schedule_type,runs_per_day,run1_time_slot
+UAT,UAT-DEMO-01,6-Wheel Truck,UAT-6W,8000,32,Owned,Synthetic Driver,UAT-LIC-001,2027-07-20,0000000000,Daily,1,Morning

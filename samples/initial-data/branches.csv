@@ -1,0 +1,2 @@
+code,name,country,currency,timezone,address,phone,tax_id,tax_rate
+UAT,Synthetic UAT Branch,TH,THB,Asia/Bangkok,Synthetic data - not a real location,,,0.07

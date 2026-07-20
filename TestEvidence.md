@@ -187,6 +187,17 @@ Production release remains conditional on completing section 6, resolving open d
 | Public Docker instructions | PASS | `DOCKER.md` covers install, update, logs, port override, backup and production hardening |
 | Production certification | NOT ACHIEVED | Current Compose credentials/network defaults are for development/demo/UAT; production hardening gates remain open |
 
+## 11. Synthetic initial-data/UAT evidence — 20 July 2026
+
+| Gate | Result | Evidence |
+|---|---|---|
+| Safety flag and password guard | PASS | Seed refuses execution unless explicitly enabled and requires a non-placeholder password of at least 12 characters |
+| First import | PASS | Created isolated `UAT` Branch with 6 role users, 1 customer, 2 products, fleet/schedule, 3 POs, 3 scenario Orders, inventory/WMS and 1 Run |
+| Multi-PO FIFO fixture | PASS | `UAT-CPO-FIFO` has 3 persisted allocation rows across the complete scenario set, including 60+10 allocation across `UAT-PO-001/002` |
+| Idempotent rerun | PASS | Second execution retained exactly 1 Branch, 6 users, 1 customer, 2 products, 3 POs, 3 Orders, 3 allocations and 1 Run |
+| Synthetic-data isolation | PASS | All scenario transactions use Branch `UAT`, reserved `UAT-*` codes and `.example.invalid` email addresses |
+| CSV preparation templates | PASS | Six UTF-8 templates document Branch, Customer, Product, Fleet, PO and Inventory mappings; templates are explicitly not presented as an implemented UI importer |
+
 ## 8. Human acceptance
 
 | Role | Name | Decision/signature | Date |

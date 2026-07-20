@@ -14,6 +14,7 @@
     "prisma:validate": "prisma validate",
     "db:migrate": "prisma migrate dev",
     "db:seed": "prisma db seed",
+    "db:seed:uat": "tsx scripts/seed-uat.ts",
     "dcp001:reconcile": "tsx scripts/dcp001-backfill.ts",
     "dcp001:apply-bb": "tsx scripts/dcp001-backfill.ts --apply --enable-bb",
     "check": "npm run lint && npm run typecheck && npm run prisma:validate && npm run test"

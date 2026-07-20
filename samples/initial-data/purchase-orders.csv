@@ -1,0 +1,4 @@
+branch_code,po_number,customer_code,po_date,buyer_name,buyer_email,status,erp_code,original_qty,unit,unit_price,expected_delivery_date,delivery_time_slot
+UAT,UAT-PO-001,UAT-CUST-001,2026-07-06,Synthetic Buyer,buyer@uat.example.invalid,Open,UAT-FG-001,60,pcs,1250,2026-07-27,Morning
+UAT,UAT-PO-002,UAT-CUST-001,2026-07-13,Synthetic Buyer,buyer@uat.example.invalid,Open,UAT-FG-001,50,pcs,1250,2026-07-27,Morning
+UAT,UAT-PO-003,UAT-CUST-001,2026-07-17,Synthetic Buyer,buyer@uat.example.invalid,Open,UAT-FG-002,30,pcs,2100,2026-07-27,Morning
