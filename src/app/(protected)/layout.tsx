@@ -23,7 +23,8 @@ export default async function ProtectedLayout({ children }: { children: React.Re
             <Link href="/schedules">ตารางรถ</Link>
           <Link href="/purchase-orders">PO</Link>
           <Link href="/orders">Order</Link>
-          <Link href="/delivery">Delivery</Link>
+            <Link href="/delivery">Delivery</Link>
+            <Link href="/returns">Returns</Link>
           <Link href="/help">คู่มือ</Link>
         </nav>
       </aside>

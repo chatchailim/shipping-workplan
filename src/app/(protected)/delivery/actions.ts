@@ -125,6 +125,88 @@ export async function assignStopAction(formData: FormData) {
   revalidatePath("/delivery");
 }
 
+export async function moveStopAction(formData: FormData) {
+  const context = await requireAuthContext();
+  requireAnyRole(context.roles, ["LOGISTICS", "BRANCH_ADMIN"]);
+  const stopId = String(formData.get("stopId"));
+  const direction = String(formData.get("direction"));
+  if (!['up', 'down'].includes(direction)) throw new Error("Invalid stop direction");
+  await prisma.$transaction(async (tx) => {
+    const stop = await tx.shippingRunOrder.findUnique({ where: { id: stopId } });
+    if (!stop) throw new Error("Stop not found");
+    const run = await tx.shippingRun.findFirst({ where: { id: stop.runId, branchId: context.activeBranchId ?? undefined, status: "Planned" } });
+    if (!run) throw new Error("Stops can only be reordered while a run is Planned");
+    const adjacent = await tx.shippingRunOrder.findFirst({
+      where: { runId: stop.runId, stopSequence: direction === "up" ? { lt: stop.stopSequence } : { gt: stop.stopSequence } },
+      orderBy: { stopSequence: direction === "up" ? "desc" : "asc" },
+    });
+    if (!adjacent) return;
+    await tx.shippingRunOrder.update({ where: { id: stop.id }, data: { stopSequence: adjacent.stopSequence } });
+    await tx.shippingRunOrder.update({ where: { id: adjacent.id }, data: { stopSequence: stop.stopSequence } });
+    await tx.auditLog.create({ data: { entityType: "ShippingRun", entityId: run.id, action: "REORDER_STOPS", userId: context.userId, branchId: run.branchId, after: JSON.stringify({ stopId, direction }) } });
+  });
+  revalidatePath("/delivery");
+}
+
+const podSchema = z.object({ runOrderId: z.string().min(1), recipientName: z.string().trim().min(2).max(120) });
+
+export async function submitPodAction(_state: DeliveryState, formData: FormData): Promise<DeliveryState> {
+  const context = await requireAuthContext();
+  requireAnyRole(context.roles, ["DRIVER", "LOGISTICS", "BRANCH_ADMIN"]);
+  const parsed = podSchema.safeParse(Object.fromEntries(formData));
+  if (!parsed.success) return { error: parsed.error.issues[0]?.message };
+  try {
+    await prisma.$transaction(async (tx) => {
+      const existing = await tx.deliveryProof.findUnique({ where: { runOrderId: parsed.data.runOrderId } });
+      if (existing) return;
+      const stop = await tx.shippingRunOrder.findUnique({ where: { id: parsed.data.runOrderId } });
+      if (!stop) throw new Error("Delivery stop not found");
+      const run = await tx.shippingRun.findFirst({ where: { id: stop.runId, branchId: context.activeBranchId ?? undefined, status: "Dispatched" } });
+      const order = await tx.order.findFirst({ where: { id: stop.orderId, branchId: context.activeBranchId ?? undefined, status: "In Transit" } });
+      if (!run || !order) throw new Error("Stop is not ready for POD");
+      const driverOnly = context.roles.includes("DRIVER") && !context.roles.some((role) => ["LOGISTICS", "BRANCH_ADMIN", "SUPER_ADMIN"].includes(role));
+      if (driverOnly && (!context.driverId || !await tx.shippingRunDriver.findFirst({ where: { runId: run.id, driverId: context.driverId } }))) throw new Error("Driver is not assigned to this run");
+      await tx.deliveryProof.create({ data: { runOrderId: stop.id, recipientName: parsed.data.recipientName, capturedById: context.userId } });
+      await tx.order.update({ where: { id: order.id }, data: { status: "Delivered" } });
+      await tx.auditLog.create({ data: { entityType: "Order", entityId: order.id, action: "POD_SUBMITTED", userId: context.userId, branchId: order.branchId } });
+    }, { isolationLevel: Prisma.TransactionIsolationLevel.Serializable });
+  } catch (error) {
+    return { error: error instanceof Error ? error.message : "Unable to submit POD" };
+  }
+  revalidatePath("/delivery"); revalidatePath("/orders");
+  return { ok: true };
+}
+
+const failureSchema = z.object({ runOrderId: z.string().min(1), reason: z.string().trim().min(3).max(300) });
+
+export async function deliveryFailedAction(_state: DeliveryState, formData: FormData): Promise<DeliveryState> {
+  const context = await requireAuthContext();
+  requireAnyRole(context.roles, ["DRIVER", "LOGISTICS", "BRANCH_ADMIN"]);
+  const parsed = failureSchema.safeParse(Object.fromEntries(formData));
+  if (!parsed.success) return { error: parsed.error.issues[0]?.message };
+  try {
+    await prisma.$transaction(async (tx) => {
+      const stop = await tx.shippingRunOrder.findUnique({ where: { id: parsed.data.runOrderId } });
+      if (!stop) throw new Error("Delivery stop not found");
+      const run = await tx.shippingRun.findFirst({ where: { id: stop.runId, branchId: context.activeBranchId ?? undefined, status: "Dispatched" } });
+      const order = await tx.order.findFirst({ where: { id: stop.orderId, branchId: context.activeBranchId ?? undefined } });
+      if (!run || !order) throw new Error("Stop is unavailable");
+      const driverOnly = context.roles.includes("DRIVER") && !context.roles.some((role) => ["LOGISTICS", "BRANCH_ADMIN", "SUPER_ADMIN"].includes(role));
+      if (driverOnly && (!context.driverId || !await tx.shippingRunDriver.findFirst({ where: { runId: run.id, driverId: context.driverId } }))) throw new Error("Driver is not assigned to this run");
+      const existingReturn = await tx.return.findFirst({ where: { orderId: order.id } });
+      if (order.status === "Delivery Failed" && existingReturn) return;
+      if (order.status !== "In Transit") throw new Error("Only an In Transit order can fail delivery");
+      await tx.order.update({ where: { id: order.id }, data: { status: "Delivery Failed" } });
+      if (!existingReturn) await tx.return.create({ data: { orderId: order.id, customerId: order.customerId, productId: order.productId, branchId: order.branchId, qty: order.qty, status: "Pending", notes: parsed.data.reason } });
+      await tx.auditLog.create({ data: { entityType: "Order", entityId: order.id, action: "DELIVERY_FAILED", userId: context.userId, branchId: order.branchId, after: JSON.stringify({ reason: parsed.data.reason }) } });
+    }, { isolationLevel: Prisma.TransactionIsolationLevel.Serializable });
+  } catch (error) {
+    return { error: error instanceof Error ? error.message : "Unable to record delivery failure" };
+  }
+  revalidatePath("/delivery"); revalidatePath("/orders"); revalidatePath("/purchase-orders");
+  return { ok: true };
+}
+
 export async function advanceRunAction(formData: FormData) {
   const context = await requireAuthContext();
   requireAnyRole(context.roles, ["LOGISTICS", "WAREHOUSE", "BRANCH_ADMIN"]);
@@ -168,10 +250,8 @@ export async function advanceRunAction(formData: FormData) {
       }
 
       if (nextStatus === "Completed") {
-        await tx.order.updateMany({
-          where: { id: { in: orderIds }, status: "In Transit" },
-          data: { status: "Delivered" },
-        });
+        const unresolved = await tx.order.count({ where: { id: { in: orderIds }, status: { notIn: ["Delivered", "Delivery Failed"] } } });
+        if (unresolved > 0) throw new Error("Every stop requires POD or Delivery Failed before completion");
 
         const linkedOrders = await tx.order.findMany({
           where: { id: { in: orderIds }, poId: { not: null } },
@@ -191,7 +271,7 @@ export async function advanceRunAction(formData: FormData) {
             }),
             tx.order.aggregate({
               _sum: { qty: true },
-              where: { poId, status: { notIn: ["Draft", "Cancelled", "Split-shipping"] } },
+              where: { poId, status: { notIn: ["Draft", "Cancelled", "Split-shipping", "Delivery Failed"] } },
             }),
             tx.order.aggregate({
               _sum: { qty: true },

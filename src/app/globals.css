@@ -134,6 +134,19 @@ body {
 .three-column-forms { align-items: start; display: grid; gap: 18px; grid-template-columns: repeat(3, minmax(0, 1fr)); margin-top: 24px; }
 .readiness-panel table { border-collapse: collapse; width: 100%; }
 .readiness-panel th, .readiness-panel td { border-bottom: 1px solid var(--border); padding: 10px; text-align: left; }
+.date-filter { align-items: end; display: flex; gap: 8px; margin-top: 14px; }
+.date-filter label, .compact-inline-form label { display: grid; font-weight: 700; gap: 4px; }
+.date-filter input, .compact-inline-form input { border: 1px solid #aebbc9; border-radius: 6px; font: inherit; padding: 8px; }
+.date-filter button, .compact-inline-form button, .stop-buttons button { background: var(--primary); border: 0; border-radius: 5px; color: #fff; padding: 8px 10px; }
+.stop-list { display: grid; gap: 8px; padding-left: 24px; }
+.stop-list li { background: #fff; border: 1px solid var(--border); border-radius: 7px; padding: 10px; }
+.stop-list li > div:first-child { display: flex; flex-direction: column; }
+.stop-list span { color: var(--muted); }
+.stop-buttons { display: flex; gap: 4px; margin-top: 6px; }
+.stop-buttons form { margin: 0; }
+.stop-outcome-grid { display: grid; gap: 8px; grid-template-columns: 1fr 1fr; margin-top: 8px; }
+.compact-inline-form { align-items: end; display: flex; flex-wrap: wrap; gap: 6px; }
+.pod-badge { background: #e9f8ef; border-radius: 999px; color: #116329 !important; display: inline-block; font-weight: 700; margin-top: 7px; padding: 4px 8px; }
 
 @media (max-width: 900px) {
   .help-layout { grid-template-columns: 1fr; }

@@ -5,6 +5,8 @@ describe("business workflow", () => {
   it("permits only declared order transitions", () => {
     expect(canTransitionOrder("Draft", "Confirmed")).toBe(true);
     expect(canTransitionOrder("Draft", "Delivered")).toBe(false);
+    expect(canTransitionOrder("In Transit", "Delivery Failed")).toBe(true);
+    expect(canTransitionOrder("Delivered", "Delivery Failed")).toBe(false);
   });
   it("advances runs forward only", () => {
     expect(nextRunStatus("Planned")).toBe("Loading");

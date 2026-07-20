@@ -92,7 +92,7 @@ flowchart LR
 
 ### 2.3 สถานะปัจจุบันของผลิตภัณฑ์
 
-โครงการมี foundation, authentication, protected dashboard, branch context และ vertical slice สำหรับ Customer, Product, Fleet, PO, Order และ Delivery แล้ว Product รองรับ immutable price history, PO รองรับหลายรายการและ balance, Draft Order รองรับ amend/split/cancel และ Fleet รองรับ Daily/Rotation/Custom schedule, day-off/substitute override และ idempotent daily run generation ฟังก์ชันขั้นสูง เช่น import/preview, bulk/FIFO หลาย PO, drag/drop, POD/Return, integration, performance และ security/UAT เต็มรูปแบบ ยังอยู่ในเฟสถัดไป จึงยังไม่ควรใช้กับ production จริง
+โครงการมี foundation, authentication, protected dashboard, branch context และ vertical slice สำหรับ Customer, Product, Fleet, PO, Order และ Delivery แล้ว รวม Product price history, PO balance, Order split, recurring schedules, Day Board, stop ordering, POD metadata และ Delivery Failed ที่สร้าง Return แบบ idempotent ฟังก์ชันขั้นสูง เช่น import/preview, bulk/FIFO หลาย PO, file/signature storage, integration, performance และ security/UAT เต็มรูปแบบ ยังอยู่ในเฟสถัดไป จึงยังไม่ควรใช้กับ production จริง
 
 ---
 

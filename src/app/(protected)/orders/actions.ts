@@ -144,7 +144,7 @@ export async function confirmOrderAction(formData: FormData) {
       }
       const [contracted, released] = await Promise.all([
         tx.purchaseOrderItem.aggregate({ _sum: { originalQty: true }, where: { poId: order.poId, productId: order.productId } }),
-        tx.order.aggregate({ _sum: { qty: true }, where: { poId: order.poId, productId: order.productId, status: { notIn: ["Draft", "Cancelled", "Split-shipping"] }, id: { not: id } } }),
+        tx.order.aggregate({ _sum: { qty: true }, where: { poId: order.poId, productId: order.productId, status: { notIn: ["Draft", "Cancelled", "Split-shipping", "Delivery Failed"] }, id: { not: id } } }),
       ]);
       const balance = Number(contracted._sum.originalQty ?? 0) - Number(released._sum.qty ?? 0);
       if (Number(order.qty) > balance) {

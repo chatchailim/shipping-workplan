@@ -11,6 +11,7 @@ export type AuthContext = {
   userId: string;
   name: string;
   email: string;
+  driverId: string | null;
   roles: string[];
   grantedBranchIds: string[];
   activeBranchId: string | null;
@@ -36,7 +37,7 @@ export async function getAuthContext(): Promise<AuthContext | null> {
     const activeBranchId = requestedBranch && (canViewAll || grantedBranchIds.includes(requestedBranch))
       ? requestedBranch
       : (grantedBranchIds[0] ?? null);
-    return { userId: user.id, name: user.name, email: user.email, roles: currentRoles, grantedBranchIds, activeBranchId, canViewAll };
+    return { userId: user.id, name: user.name, email: user.email, driverId: user.driverId, roles: currentRoles, grantedBranchIds, activeBranchId, canViewAll };
   } catch {
     return null;
   }

@@ -404,7 +404,7 @@ model WmsSyncLog {
 
 model DeliveryProof {
   id            String   @id @default(cuid())
-  runOrderId    String
+  runOrderId    String   @unique
   imagePath     String?
   signaturePath String?
   recipientName String?
