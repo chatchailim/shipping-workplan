@@ -1,5 +1,7 @@
 # คู่มือการใช้งาน OPT Shipping Work Plan v2
 
+[![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](./LICENSE)
+
 > **สำหรับนักพัฒนา:** ดู [DEVELOPER_GUIDE.md](./DEVELOPER_GUIDE.md) สำหรับการติดตั้ง สถาปัตยกรรม การพัฒนา migration/testing และ DCP-001 และดู [CONTRIBUTING.md](./CONTRIBUTING.md) ก่อนส่ง Pull Request
 
 > คู่มือสำหรับผู้ใช้งานเริ่มต้น ตั้งแต่ทำความเข้าใจกระบวนการ เข้าสู่ระบบ ทำงานประจำวัน ไปจนถึงแก้ปัญหาเบื้องต้น

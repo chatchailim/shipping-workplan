@@ -256,14 +256,14 @@ Before changing repository visibility to public:
 
 - complete a secret-history scan, not only a current-file scan;
 - verify `.env`, dumps, customer data and generated POD files were never committed;
-- choose and add an explicit `LICENSE` file;
+- verify the chosen [Apache License 2.0](./LICENSE) remains appropriate for the copyright owner and dependencies;
 - configure branch protection and required CI checks;
 - enable Dependabot/automated dependency alerts and secret scanning where available;
 - publish a supported-version and disclosure policy in [SECURITY.md](./SECURITY.md);
 - replace organization-specific test data with synthetic examples;
 - have the Product Owner and IT/Security review the public content.
 
-Without a `LICENSE`, public visibility does not grant others permission to copy, modify or redistribute the code. The repository owner must deliberately choose the license.
+This repository uses Apache License 2.0, which permits use, modification and redistribution subject to its notice, license and patent terms. Contributors must not add code or assets under incompatible terms.
 
 ## 15. Related documents
 
