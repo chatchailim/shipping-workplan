@@ -7,10 +7,61 @@ import { requireAnyRole } from "@/lib/auth/roles";
 
 export type ProductState = { ok?: boolean; error?: string };
 const schema = z.object({ erpCode:z.string().trim().min(1).max(60), partName:z.string().trim().min(2).max(160), material:z.string().trim().min(1).max(80), color:z.string().trim().min(1).max(60), dimensions:z.string().trim().min(1).max(100), weightKg:z.coerce.number().positive(), price:z.coerce.number().nonnegative(), unit:z.string().trim().min(1).max(20), pcsPerPack:z.coerce.number().int().positive() });
+const updateSchema = schema.omit({ erpCode: true }).extend({
+  id: z.string().min(1),
+  source: z.string().trim().min(2).max(80),
+});
 
 export async function createProductAction(_s:ProductState, fd:FormData):Promise<ProductState>{
   const c=await requireAuthContext(); requireAnyRole(c.roles,["CS","BRANCH_ADMIN"]); if(!c.activeBranchId)return{error:"กรุณาเลือกสาขา"};
   const p=schema.safeParse(Object.fromEntries(fd)); if(!p.success)return{error:p.error.issues[0]?.message};
   try{await prisma.$transaction(async tx=>{const item=await tx.product.create({data:{...p.data,branchId:c.activeBranchId!}});await tx.auditLog.create({data:{entityType:"Product",entityId:item.id,action:"CREATE",userId:c.userId,branchId:c.activeBranchId!,after:JSON.stringify({erpCode:item.erpCode})}})});}catch{return{error:"ERP Code ซ้ำหรือข้อมูลไม่ถูกต้อง"};}
   revalidatePath("/products"); return{ok:true};
+}
+
+export async function updateProductAction(
+  _state: ProductState,
+  formData: FormData,
+): Promise<ProductState> {
+  const context = await requireAuthContext();
+  requireAnyRole(context.roles, ["CS", "BRANCH_ADMIN"]);
+  if (!context.activeBranchId) return { error: "Please select a branch" };
+
+  const parsed = updateSchema.safeParse(Object.fromEntries(formData));
+  if (!parsed.success) return { error: parsed.error.issues[0]?.message };
+
+  const current = await prisma.product.findFirst({
+    where: { id: parsed.data.id, branchId: context.activeBranchId },
+  });
+  if (!current) return { error: "Product was not found in the selected branch" };
+
+  const { id, source, ...changes } = parsed.data;
+  await prisma.$transaction(async (tx) => {
+    await tx.product.update({ where: { id }, data: changes });
+    if (!current.price.equals(changes.price)) {
+      await tx.productPriceLog.create({
+        data: {
+          productId: id,
+          oldPrice: current.price,
+          newPrice: changes.price,
+          changedById: context.userId,
+          source,
+        },
+      });
+    }
+    await tx.auditLog.create({
+      data: {
+        entityType: "Product",
+        entityId: id,
+        action: "UPDATE",
+        userId: context.userId,
+        branchId: context.activeBranchId!,
+        before: JSON.stringify({ price: current.price.toString() }),
+        after: JSON.stringify({ price: changes.price }),
+      },
+    });
+  });
+
+  revalidatePath("/products");
+  return { ok: true };
 }

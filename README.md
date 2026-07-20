@@ -92,7 +92,7 @@ flowchart LR
 
 ### 2.3 สถานะปัจจุบันของผลิตภัณฑ์
 
-โครงการมี foundation, authentication, protected dashboard, branch context และ vertical slice สำหรับ Customer, Product, Fleet, PO, Order และ Delivery แล้ว โดยทดสอบเส้นทาง Product → Fleet → PO → Order → Delivery สำเร็จในเครื่อง ฟังก์ชันขั้นสูง เช่น import/preview, แก้ไขราคาและ price history, split/bulk/amendment, recurring schedule, drag/drop, POD/Return, integration, performance และ security/UAT เต็มรูปแบบ ยังอยู่ในเฟสถัดไป จึงยังไม่ควรใช้กับ production จริง
+โครงการมี foundation, authentication, protected dashboard, branch context และ vertical slice สำหรับ Customer, Product, Fleet, PO, Order และ Delivery แล้ว โดยทดสอบเส้นทาง Product → Fleet → PO → Order → Delivery สำเร็จในเครื่อง Product รองรับการแก้ไขพร้อม immutable price history และ PO รองรับการเพิ่มหลายรายการพร้อม Contracted/Released/Balance แล้ว ฟังก์ชันขั้นสูง เช่น import/preview, split/bulk/amendment, recurring schedule, drag/drop, POD/Return, integration, performance และ security/UAT เต็มรูปแบบ ยังอยู่ในเฟสถัดไป จึงยังไม่ควรใช้กับ production จริง
 
 ---
 

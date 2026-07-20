@@ -124,6 +124,10 @@ body {
 .run-card h3 { margin: 0; }
 .run-card form { display: inline-flex; flex-wrap: wrap; gap: 8px; margin: 5px 8px 0 0; }
 .run-card button, .customer-layout table button { background: var(--primary); border: 0; border-radius: 5px; color: #fff; padding: 7px 10px; }
+.edit-panel { min-width: 110px; }
+.edit-panel summary { color: var(--primary); cursor: pointer; font-weight: 700; }
+.edit-panel[open] { background: #f8fafc; border: 1px solid var(--border); border-radius: 8px; padding: 12px; width: min(420px, 75vw); }
+.compact-form { margin-top: 12px; padding: 14px; }
 
 @media (max-width: 900px) {
   .help-layout { grid-template-columns: 1fr; }
