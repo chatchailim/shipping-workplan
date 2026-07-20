@@ -1,0 +1,2 @@
+branch_code,customer_code,company_name,address,payment_terms,default_delivery_time,contact_name,phone,email,tax_id
+UAT,UAT-CUST-001,Synthetic Automotive Customer,99 Synthetic Industrial Road,Net30,09:00-12:00,UAT Contact,0000000000,customer@uat.example.invalid,
