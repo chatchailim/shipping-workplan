@@ -12,6 +12,8 @@
 
 หลักฐานการทดสอบและข้อจำกัดการส่งมอบล่าสุดอยู่ที่ [TestEvidence.md](./TestEvidence.md) โดย PASS ครอบคลุมเฉพาะ scope ที่ implement และ execute แล้ว ไม่ใช่ production sign-off ทั้ง TestSpec
 
+ข้อเสนอการเปลี่ยนแปลงกฎกลาง, FIFO หลาย PO และ Inventory/WMS freshness อยู่ที่ [DesignChangeProposal-001.md](./DesignChangeProposal-001.md) สถานะ Proposed และยังไม่อนุญาตให้เปลี่ยน schema/business logic จนกว่าผู้ออกแบบระบบจะอนุมัติ
+
 ## สารบัญ
 
 1. [ระบบนี้ใช้ทำอะไร](#1-ระบบนี้ใช้ทำอะไร)
