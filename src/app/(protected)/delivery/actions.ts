@@ -107,7 +107,7 @@ export async function assignStopAction(formData: FormData) {
 
   const [run, order] = await Promise.all([
     prisma.shippingRun.findFirst({
-      where: { id: runId, branchId: context.activeBranchId ?? undefined, status: "Planned" },
+      where: { id: runId, branchId: context.activeBranchId ?? undefined, status: "Planned", approvalStatus: "Draft" },
     }),
     prisma.order.findFirst({
       where: {
@@ -135,7 +135,7 @@ export async function moveStopAction(formData: FormData) {
   await prisma.$transaction(async (tx) => {
     const stop = await tx.shippingRunOrder.findUnique({ where: { id: stopId } });
     if (!stop) throw new Error("Stop not found");
-    const run = await tx.shippingRun.findFirst({ where: { id: stop.runId, branchId: context.activeBranchId ?? undefined, status: "Planned" } });
+    const run = await tx.shippingRun.findFirst({ where: { id: stop.runId, branchId: context.activeBranchId ?? undefined, status: "Planned", approvalStatus: "Draft" } });
     if (!run) throw new Error("Stops can only be reordered while a run is Planned");
     const adjacent = await tx.shippingRunOrder.findFirst({
       where: { runId: stop.runId, stopSequence: direction === "up" ? { lt: stop.stopSequence } : { gt: stop.stopSequence } },
@@ -211,6 +211,21 @@ export async function deliveryFailedAction(_state: DeliveryState, formData: Form
   return { ok: true };
 }
 
+export async function approveRunAction(formData: FormData) {
+  const context = await requireAuthContext();
+  requireAnyRole(context.roles, ["LOGISTICS", "BRANCH_ADMIN"]);
+  const id = z.string().min(1).parse(formData.get("id"));
+  await prisma.$transaction(async (tx) => {
+    const run = await tx.shippingRun.findFirst({ where: { id, branchId: context.activeBranchId ?? undefined, status: "Planned", approvalStatus: "Draft" } });
+    if (!run) throw new Error("Draft delivery plan not found");
+    const stopCount = await tx.shippingRunOrder.count({ where: { runId: id } });
+    if (stopCount === 0) throw new Error("At least one stop is required before Logistics approval");
+    await tx.shippingRun.update({ where: { id }, data: { approvalStatus: "LogisticsConfirmed", approvedById: context.userId, approvedAt: new Date() } });
+    await tx.auditLog.create({ data: { entityType: "ShippingRun", entityId: id, action: "LOGISTICS_APPROVE", userId: context.userId, branchId: run.branchId, after: JSON.stringify({ stopCount }) } });
+  });
+  revalidatePath("/delivery");
+}
+
 export async function advanceRunAction(formData: FormData) {
   const context = await requireAuthContext();
   requireAnyRole(context.roles, ["LOGISTICS", "WAREHOUSE", "BRANCH_ADMIN"]);
@@ -222,6 +237,10 @@ export async function advanceRunAction(formData: FormData) {
         where: { id, branchId: context.activeBranchId ?? undefined },
       });
       if (!run) throw new Error("Delivery run not found");
+
+      if (run.status === "Planned" && run.approvalStatus !== "LogisticsConfirmed") {
+        throw new Error("Logistics must confirm the Delivery Plan before loading");
+      }
 
       const nextStatus = nextRunStatus(run.status);
       if (!nextStatus) throw new Error("Delivery run is already complete");

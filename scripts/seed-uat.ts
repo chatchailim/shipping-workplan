@@ -99,7 +99,15 @@ async function main() {
   }
   await prisma.branchFeatureFlag.upsert({ where: { branchId_key: { branchId: branch.id, key: "DCP001_FIFO" } }, update: { enabled: true }, create: { branchId: branch.id, key: "DCP001_FIFO", enabled: true } });
   const sync = await prisma.wmsSyncLog.findFirst({ where: { branchId: branch.id, sourceFile: "synthetic-uat-seed" } });
-  if (!sync) await prisma.wmsSyncLog.create({ data: { branchId: branch.id, mode: "Synthetic", sourceFile: "synthetic-uat-seed", startedAt: new Date(), completedAt: new Date(), rowCount: 2, status: "Completed" } });
+  const syncCompletedAt = new Date();
+  if (sync) {
+    await prisma.wmsSyncLog.update({
+      where: { id: sync.id },
+      data: { startedAt: syncCompletedAt, completedAt: syncCompletedAt, rowCount: 2, status: "Completed" },
+    });
+  } else {
+    await prisma.wmsSyncLog.create({ data: { branchId: branch.id, mode: "Synthetic", sourceFile: "synthetic-uat-seed", startedAt: syncCompletedAt, completedAt: syncCompletedAt, rowCount: 2, status: "Completed" } });
+  }
 
   const run = await prisma.shippingRun.upsert({ where: { runNumber: "DP-UAT-0001" }, update: {}, create: { runNumber: "DP-UAT-0001", branchId: branch.id, vehicleId: vehicle.id, plannedDate: day(2), departureTime: "08:00", runType: "Delivery", status: "Planned", noteToDriver: "Synthetic UAT run" } });
   await prisma.shippingRunDriver.upsert({ where: { runId_driverId: { runId: run.id, driverId: driver.id } }, update: {}, create: { runId: run.id, driverId: driver.id, isPrimary: true } });

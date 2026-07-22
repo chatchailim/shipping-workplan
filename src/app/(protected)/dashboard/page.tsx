@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import { requireAuthContext } from "@/lib/auth/context";
+import { DASHBOARD_READINESS_ITEMS } from "@/lib/readiness";
 
 export const dynamic = "force-dynamic";
 
@@ -23,7 +24,10 @@ export default async function DashboardPage() {
         <article><span>Order</span><strong>{orders}</strong></article>
         <article><span>เที่ยวรถ</span><strong>{runs}</strong></article>
       </section>
-      <section className="readiness-panel"><h2>สถานะความพร้อม</h2><ul><li>Authentication และ branch context เปิดใช้งานแล้ว</li><li>Customer master เป็น vertical slice แรก</li><li>PO/Order/Delivery ยังอยู่ในลำดับพัฒนาถัดไป</li></ul></section>
+      <section className="readiness-panel">
+        <h2>สถานะความพร้อม</h2>
+        <ul>{DASHBOARD_READINESS_ITEMS.map((item) => <li key={item}>{item}</li>)}</ul>
+      </section>
     </main>
   );
 }

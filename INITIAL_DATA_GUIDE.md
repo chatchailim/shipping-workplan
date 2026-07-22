@@ -145,6 +145,7 @@ Safety controls:
 - ไม่รันหากไม่มี `ALLOW_SYNTHETIC_UAT_SEED=true`
 - ไม่รันหาก password สั้นกว่า 12 ตัวอักษรหรือเป็น placeholder
 - ใช้ upsert/find-before-create เพื่อให้รันซ้ำได้
+- การรันซ้ำจะต่ออายุ timestamp ของ synthetic WMS sync เพื่อเริ่มรอบทดสอบ freshness ใหม่ โดยไม่ปลอมเป็น live WMS heartbeat
 - ไม่ลบหรือ reset ข้อมูลเดิม
 - สร้างข้อมูลใน Branch `UAT` แยกจาก BB และสาขาปฏิบัติการ
 

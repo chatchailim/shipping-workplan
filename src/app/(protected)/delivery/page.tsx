@@ -1,7 +1,7 @@
 import { requireAuthContext } from "@/lib/auth/context";
 import { hasAnyRole } from "@/lib/auth/roles";
 import { prisma } from "@/lib/prisma";
-import { advanceRunAction, assignStopAction, moveStopAction } from "./actions";
+import { advanceRunAction, approveRunAction, assignStopAction, moveStopAction } from "./actions";
 import { RunForm } from "./run-form";
 import { StopOutcomeForm } from "./stop-outcome-form";
 
@@ -30,14 +30,15 @@ export default async function DeliveryPage({ searchParams }: { searchParams: Pro
     <form method="get" className="date-filter"><label>วันที่<input name="date" type="date" defaultValue={selectedDate} /></label><button>แสดง Day Board</button></form>
   </header><div className="customer-layout"><section><h2>Runs ({runs.length})</h2>{runs.length === 0 && <p className="empty-state">ไม่มีเที่ยวรถในวันที่เลือก</p>}
     {runs.map((run) => { const runStops = stops.filter((stop) => stop.runId === run.id); return <article className="run-card" key={run.id}>
-      <h3>{run.runNumber} — {run.status}</h3><p>{selectedDate} เวลา {run.departureTime || "—"} · Stops {runStops.length}</p>
+      <h3>{run.runNumber} — {run.status}</h3><p>{selectedDate} เวลา {run.departureTime || "—"} · Stops {runStops.length} · Approval: {run.approvalStatus}</p>
       {runStops.length > 0 && <ol className="stop-list">{runStops.map((stop, index) => { const order = orderMap.get(stop.orderId); return <li key={stop.id}><div><strong>#{stop.stopSequence} {order?.runNumber ?? "—"}</strong><span>{order?.customerPORef} · Qty {order?.qty.toString()} · {order?.status}</span></div>
-        {run.status === "Planned" && <div className="stop-buttons"><form action={moveStopAction}><input name="stopId" type="hidden" value={stop.id} /><input name="direction" type="hidden" value="up" /><button disabled={index === 0}>↑</button></form><form action={moveStopAction}><input name="stopId" type="hidden" value={stop.id} /><input name="direction" type="hidden" value="down" /><button disabled={index === runStops.length - 1}>↓</button></form></div>}
+        {run.status === "Planned" && run.approvalStatus === "Draft" && <div className="stop-buttons"><form action={moveStopAction}><input name="stopId" type="hidden" value={stop.id} /><input name="direction" type="hidden" value="up" /><button disabled={index === 0}>↑</button></form><form action={moveStopAction}><input name="stopId" type="hidden" value={stop.id} /><input name="direction" type="hidden" value="down" /><button disabled={index === runStops.length - 1}>↓</button></form></div>}
         {run.status === "Dispatched" && order?.status === "In Transit" && <StopOutcomeForm runOrderId={stop.id} />}
         {proofStopIds.has(stop.id) && <span className="pod-badge">POD recorded</span>}
       </li>; })}</ol>}
-      {run.status === "Planned" && orders.length > 0 && <form action={assignStopAction}><input type="hidden" name="runId" value={run.id} /><select name="orderId">{orders.map((order) => <option key={order.id} value={order.id}>{order.runNumber} — {order.customerPORef}</option>)}</select><button>เพิ่ม Stop</button></form>}
-      <form action={advanceRunAction}><input type="hidden" name="id" value={run.id} /><button disabled={run.status === "Completed"}>{run.status === "Planned" ? "เริ่ม Loading" : run.status === "Loading" ? "Dispatch" : run.status === "Dispatched" ? "Complete" : "Completed"}</button></form>
+      {run.status === "Planned" && run.approvalStatus === "Draft" && orders.length > 0 && <form action={assignStopAction}><input type="hidden" name="runId" value={run.id} /><select name="orderId">{orders.map((order) => <option key={order.id} value={order.id}>{order.runNumber} — {order.customerPORef}</option>)}</select><button>เพิ่ม Stop</button></form>}
+      {run.status === "Planned" && run.approvalStatus === "Draft" && hasAnyRole(context.roles, ["LOGISTICS", "BRANCH_ADMIN"]) && <form action={approveRunAction}><input type="hidden" name="id" value={run.id}/><button>Logistics ยืนยัน Delivery Plan</button></form>}
+      <form action={advanceRunAction}><input type="hidden" name="id" value={run.id} /><button disabled={run.status === "Completed" || (run.status === "Planned" && run.approvalStatus !== "LogisticsConfirmed")}>{run.status === "Planned" ? "เริ่ม Loading" : run.status === "Loading" ? "Dispatch" : run.status === "Dispatched" ? "Complete" : "Completed"}</button></form>
     </article>; })}</section>
     {hasAnyRole(context.roles, ["LOGISTICS", "BRANCH_ADMIN"]) ? <RunForm vehicles={vehicles.map((vehicle) => ({ id: vehicle.id, label: `${vehicle.plate} — ${vehicle.type}` }))} drivers={drivers.map((driver) => ({ id: driver.id, label: driver.name }))} /> : <aside className="permission-note">ไม่มีสิทธิ์สร้าง Run</aside>}
   </div></main>;

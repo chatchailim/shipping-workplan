@@ -200,6 +200,46 @@ model PurchaseOrder {
   @@unique([branchId, poNumber])
 }
 
+model InboundDocument {
+  id             String    @id @default(cuid())
+  branchId       String
+  channel        String
+  sourceRef      String?
+  sourceFileName String?
+  storagePath    String?
+  checksum       String?
+  sender         String?
+  status         String    @default("Received")
+  extractionData String?
+  extractionNote String?
+  createdById    String
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  @@unique([branchId, checksum])
+  @@index([branchId, status, createdAt])
+}
+
+model PurchaseOrderRevision {
+  id               String    @id @default(cuid())
+  purchaseOrderId  String
+  inboundDocumentId String?
+  revisionNo       Int
+  status           String    @default("PendingReview")
+  proposedData     String
+  changeSet        String
+  reviewedById     String?
+  reviewedAt       DateTime?
+  rejectionReason  String?
+  createdById      String
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+
+  @@unique([purchaseOrderId, revisionNo])
+  @@index([purchaseOrderId, status])
+  @@index([inboundDocumentId])
+}
+
 model PurchaseOrderItem {
   id                   String    @id @default(cuid())
   poId                 String
@@ -279,10 +319,33 @@ model ShippingRun {
   noteToDriver   String?
   noteToCustomer String?
   status         String   @default("Planned")
+  approvalStatus String   @default("Draft")
+  approvedById   String?
+  approvedAt     DateTime?
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
 
   @@index([branchId, plannedDate, status])
+}
+
+model ErpSubmission {
+  id             String    @id @default(cuid())
+  purchaseOrderId String
+  idempotencyKey String    @unique
+  mode           String    @default("PendingContract")
+  status         String    @default("Queued")
+  soNumber       String?
+  requestData    String
+  responseData   String?
+  errorMessage   String?
+  attemptCount   Int       @default(0)
+  submittedById  String
+  submittedAt    DateTime?
+  completedAt    DateTime?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  @@index([purchaseOrderId, status])
 }
 
 model RunNumberCounter {
