@@ -139,7 +139,7 @@ The following areas remain outside this PASS statement:
 |---|---|---|
 | Full user/role administration and every RBAC matrix permutation | NOT RUN | Admin UI and dedicated accounts per role are incomplete |
 | CSV/XLSX import preview, reject file and conflict workflow | NOT IMPLEMENTED | Import module is not present |
-| FIFO allocation across multiple POs and bulk Order operations | PARTIAL | Canonical multi-PO calculator and persisted allocation model pass unit/build checks; browser E2E and concurrent PostgreSQL test remain open |
+| FIFO allocation across multiple POs and bulk Order operations | PARTIAL | Canonical multi-PO calculator, persisted allocation and Browser UAT fixture passed; concurrent PostgreSQL and bulk-operation tests remain open |
 | Drag-and-drop Day Board and mobile-only Driver view | NOT IMPLEMENTED | Current stop ordering uses accessible up/down controls |
 | POD image/signature upload, MIME/size validation and private storage | NOT IMPLEMENTED | Current POD stores metadata only |
 | Production Plan and production-to-stock workflow | NOT IMPLEMENTED | P4 remaining scope |
@@ -198,6 +198,20 @@ Production release remains conditional on completing section 6, resolving open d
 | Synthetic-data isolation | PASS | All scenario transactions use Branch `UAT`, reserved `UAT-*` codes and `.example.invalid` email addresses |
 | CSV preparation templates | PASS | Six UTF-8 templates document Branch, Customer, Product, Fleet, PO and Inventory mappings; templates are explicitly not presented as an implemented UI importer |
 
+## 12. Dashboard and WMS freshness regression — 20 July 2026
+
+| Gate | Result | Evidence |
+|---|---|---|
+| Dashboard readiness copy | PASS | Browser shows implemented Customer/Product/Fleet/PO/Order/Inventory/Delivery vertical slices and no longer claims PO/Order/Delivery are future work |
+| Readiness copy regression | PASS | Automated test prevents the obsolete `ลำดับพัฒนาถัดไป` wording from returning |
+| Synthetic WMS refresh | PASS | Idempotent UAT seed updates the existing synthetic sync timestamp without creating a duplicate log |
+| Inventory freshness detail | PASS | Browser shows `WMS freshness: Fresh` and the last successful sync timestamp |
+| Exception reconciliation | PASS | WMS exception shows `Fresh`, count `0`, severity `Clear` immediately after the controlled UAT seed |
+| Inventory reconciliation | PASS | Browser retained FG-001 `80/70/10/0` and FG-002 `20/15/5/0` for On Hand/Reserved/Available/Shortage |
+| Browser console | PASS | No console errors were recorded on the tested Dashboard, Inventory and Exceptions flow |
+| Automated quality gate | PASS | ESLint, TypeScript, Prisma validation and 26 tests across 8 files passed |
+| Docker regression | PASS | Optimized image rebuilt; app and PostgreSQL containers reported healthy |
+
 ## 8. Human acceptance
 
 | Role | Name | Decision/signature | Date |
@@ -211,3 +225,15 @@ Production release remains conditional on completing section 6, resolving open d
 Suggested acceptance statement:
 
 > I acknowledge that the implemented structural scope and evidence in section 4 passed, that section 6 remains open, and that this document does not authorize production Go-Live.
+
+## 13. DCP-002 workflow foundation — 22 July 2026
+
+| Gate | Status | Evidence |
+|---|---|---|
+| Inbound document register | IMPLEMENTED | Gmail/LINE OA/manual source metadata, checksum and processing status are persisted; live connectors remain pending |
+| PO duplicate detection | IMPLEMENTED | Same branch/PO is compared as a candidate Revision; identical data records `DuplicateNoChange` |
+| PO Revision diff and decision | IMPLEMENTED | Header and line Added/Removed/Changed differences, CS accept/reject and audit history |
+| Operational overwrite protection | IMPLEMENTED | Revision acceptance is blocked when linked Orders are beyond Draft/Cancelled |
+| ERP submission control | FOUNDATION | Idempotent `ManualReview` queue is implemented; live ERP execution remains blocked on contract and credentials |
+| Logistics approval | IMPLEMENTED | Draft Delivery Plan remains editable; Logistics confirmation is required before Loading |
+| Live Gmail/LINE/Drive/ERP and AI extraction | NOT CONNECTED | Adapter contracts, credentials, security policy and representative files are still required |
